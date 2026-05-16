@@ -1,5 +1,62 @@
 #include <iostream>
+#include <string>
+#include <vector>
 using namespace std;
+
+struct Account {
+    int accountNumber;
+    string name;
+    string contact;
+    string pin;
+    double balance;
+
+};
+
+vector<Account> accounts;
+int nextAccountNumber = 1001;
+
+void createAccount() {
+    Account newAccount;
+    newAccount.accountNumber = nextAccountNumber++;
+
+    cout << "Enter your name: " << endl;
+    cin.ignore(); // Clear the input buffer before using getline
+    getline(cin, newAccount.name);
+
+    cout << "Enter your contact information: " <<endl;
+    cin >> newAccount.contact;
+
+    string confirmPin;
+    do
+    {
+    cout << "Set a 4-digit PIN: ";
+        cin >> newAccount.pin;
+        
+        cout << "Confirm your PIN: ";
+        cin >> confirmPin;
+        if (newAccount.pin != confirmPin)
+        {
+            cout << "PINs do not match. Please try again." << endl;
+        }
+    } while (newAccount.pin != confirmPin);
+
+    double initialDeposit;
+    do
+    {
+        cout << "Enter initial deposit (minimum GHS 30): ";
+        cin >> initialDeposit;
+        if (initialDeposit < 30)
+        {
+            cout << "Minimum deposit is GHS 30. Please try again." << endl;
+        }
+    } while (initialDeposit < 30);
+
+    newAccount.balance = initialDeposit;
+    accounts.push_back(newAccount);
+
+    cout << "Account created successfully! Your account number is: " << newAccount.accountNumber << endl;
+}
+
 
 int main(){
     int menu;
@@ -27,7 +84,7 @@ int main(){
 
     switch(menu){
         case 1:
-            cout << "Feature coming soon!" << endl;
+            createAccount();
             break;
         case 2:
             cout << "Feature coming soon!" << endl;
@@ -49,9 +106,7 @@ int main(){
             break;
         default:
             cout << "Invalid option. Please try again." << endl;
-    }
-
-
+    }  
 
 } while (menu !=7);
 
