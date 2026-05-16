@@ -57,6 +57,47 @@ void createAccount() {
     cout << "Account created successfully! Your account number is: " << newAccount.accountNumber << endl;
 }
 
+void depositMoney() {
+    int accNumber;
+    cout << "Enter account number: ";
+    cin >> accNumber;
+
+    int index = -1;
+    for (int i = 0; i < accounts.size(); i++){
+        if (accounts[i].accountNumber == accNumber){
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        cout << "Account not found!" << endl;
+        return;
+    }
+
+    string enteredPin;
+    cout <<"Enter your PIN : " << endl;
+    cin >> enteredPin;
+
+    if (enteredPin != accounts[index].pin) {
+cout << "Incorrect PIN!" << endl;
+        return;
+    }
+
+
+    double amount;
+    cout << "Enter amount to deposit : " << endl;
+    cin >> amount;
+
+    if (amount <= 0) {
+        cout << "Invalid amount!" << endl;
+        return;
+    }
+    accounts[index].balance += amount;
+    cout << "Deposit successfull! New balance : GHS " << accounts[index].balance << endl;
+
+}
+
 
 int main(){
     int menu;
@@ -87,7 +128,7 @@ int main(){
             createAccount();
             break;
         case 2:
-            cout << "Feature coming soon!" << endl;
+            depositMoney();
             break;
         case 3:
             cout << "Feature coming soon!" << endl;
