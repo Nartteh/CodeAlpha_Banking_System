@@ -247,6 +247,86 @@ void viewTransactionHistory() {
     }
 }
 
+void fundTransfer() {
+    int accNumber;
+
+    cout << "Enter your Account Number :" << endl;
+    cin >> accNumber;
+
+    int index = -1;
+    for (int i = 0; i < accounts.size(); i++)
+    {
+        if (accounts[i].accountNumber == accNumber)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1)
+    {
+        cout << "Account not found!" << endl;
+        return;
+    }
+
+    string enteredPin;
+    cout << "Enter your PIN : " << endl;
+    cin >> enteredPin;
+
+    if (enteredPin != accounts[index].pin)
+    {
+        cout << "Incorrect PIN!" << endl;
+        return;
+    }
+
+    int receiverNumber;
+    cout << "Enter receiver's account number: " << endl;
+    cin >> receiverNumber;
+
+    int receiverIndex = -1;
+    for (int i = 0; i < accounts.size(); i++)
+    {
+        if (accounts[i].accountNumber == receiverNumber)
+        {
+            receiverIndex = i;
+            break;
+        }
+    }
+
+    if (receiverIndex == -1)
+    {
+        cout << "Receiver account not found!" << endl;
+        return;
+    }
+
+    double amount;
+    cout << "Enter amount to transfer: " << endl;
+    cin >> amount;
+
+    if (accounts[index].balance - amount < 30)
+    {
+        cout << "Insufficient funds! Minimum balance of GHS 30 must remain." << endl;
+        return;
+    }
+
+    accounts[index].balance -= amount;
+    accounts[receiverIndex].balance += amount;
+
+    Transaction t1;
+    t1.type = "Transfer Out";
+    t1.amount = amount;
+    t1.balance = accounts[index].balance;
+    accounts[index].transactions.push_back(t1);
+
+    Transaction t2;
+    t2.type = "Transfer In";
+    t2.amount = amount;
+    t2.balance = accounts[receiverIndex].balance;
+    accounts[receiverIndex].transactions.push_back(t2);
+
+    cout << "Transfer successful! Your new balance: GHS " << accounts[index].balance << endl;
+}
+
 int main(){
     int menu;
 
@@ -288,7 +368,7 @@ int main(){
             viewTransactionHistory();
             break;
         case 6:
-            cout << "Feature coming soon!" << endl;
+            fundTransfer();
             break;
         case 7:
             cout << "Thank you for using CodeAlpha Banking System. Goodbye!" << endl;
