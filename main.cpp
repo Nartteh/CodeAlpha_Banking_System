@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 struct Transaction
@@ -327,8 +328,47 @@ void fundTransfer() {
     cout << "Transfer successful! Your new balance: GHS " << accounts[index].balance << endl;
 }
 
+void saveAccounts()
+{
+    ofstream file("accounts.txt");
+    for (int i = 0; i < accounts.size(); i++)
+    {
+        file << accounts[i].accountNumber << "\n";
+        file << accounts[i].name << "\n";
+        file << accounts[i].contact << "\n";
+        file << accounts[i].pin << "\n";
+        file << accounts[i].balance << "\n";
+    }
+    file.close();
+}
+
+void loadAccounts()
+{
+    ifstream file("accounts.txt");
+    if (!file)
+        return;
+
+    Account acc;
+    while (file >> acc.accountNumber)
+    {
+        file.ignore();
+        getline(file, acc.name);
+        getline(file, acc.contact);
+        getline(file, acc.pin);
+        file >> acc.balance;
+        file.ignore();
+        accounts.push_back(acc);
+        if (acc.accountNumber >= nextAccountNumber)
+        {
+            nextAccountNumber = acc.accountNumber + 1;
+        }
+    }
+    file.close();
+}
+
 int main(){
     int menu;
+    loadAccounts();
 
     do{
 
@@ -370,7 +410,9 @@ int main(){
         case 6:
             fundTransfer();
             break;
+            
         case 7:
+            saveAccounts();
             cout << "Thank you for using CodeAlpha Banking System. Goodbye!" << endl;
             break;
         default:
