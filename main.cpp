@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <ctime>
 using namespace std;
 
 struct Transaction
@@ -18,11 +19,54 @@ struct Account {
     string pin;
     double balance;
     vector<Transaction> transactions;
+    int failedAttempts;
+    time_t lockoutTime;
 };
 
 
 vector<Account> accounts;
 int nextAccountNumber = 1001;
+
+bool verifyPin(int index)
+{
+    time_t now = time(0);
+
+    if (accounts[index].failedAttempts >= 3)
+    {
+        double secondsLeft = difftime(accounts[index].lockoutTime + 1200, now);
+        if (secondsLeft > 0)
+        {
+            cout << "Account locked! Try again in " << (int)(secondsLeft / 60) << " minutes." << endl;
+            return false;
+        }
+        else
+        {
+            accounts[index].failedAttempts = 0;
+        }
+    }
+
+    string enteredPin;
+    cout << "Enter your PIN: ";
+    cin >> enteredPin;
+
+    if (enteredPin != accounts[index].pin)
+    {
+        accounts[index].failedAttempts++;
+        if (accounts[index].failedAttempts >= 3)
+        {
+            accounts[index].lockoutTime = time(0);
+            cout << "Too many wrong attempts! Account locked for 20 minutes." << endl;
+        }
+        else
+        {
+            cout << "Incorrect PIN! Attempts remaining: " << 3 - accounts[index].failedAttempts << endl;
+        }
+        return false;
+    }
+
+    accounts[index].failedAttempts = 0;
+    return true;
+}
 
 void createAccount() {
     Account newAccount;
@@ -60,6 +104,9 @@ void createAccount() {
         }
     } while (initialDeposit < 30);
 
+    newAccount.failedAttempts = 0;
+    newAccount.lockoutTime = 0;
+
     newAccount.balance = initialDeposit;
     accounts.push_back(newAccount);
 
@@ -84,14 +131,8 @@ void depositMoney() {
         return;
     }
 
-    string enteredPin;
-    cout <<"Enter your PIN : " << endl;
-    cin >> enteredPin;
-
-    if (enteredPin != accounts[index].pin) {
-cout << "Incorrect PIN!" << endl;
+    if (!verifyPin(index))
         return;
-    }
 
 
     double amount;
@@ -134,15 +175,8 @@ void withdrawMoney(){
         return;
     }
 
-    string enteredPin;
-    cout << "Enter your PIN : " << endl;
-    cin >> enteredPin;
-
-    if (enteredPin != accounts[index].pin)
-    {
-        cout << "Incorrect PIN!" << endl;
+    if (!verifyPin(index))
         return;
-    }
 
     double amount;
     cout << "Enter amount to withdraw : " << endl;
@@ -186,16 +220,8 @@ void checkBalance() {
         return;
     }
 
-    string enteredPin;
-    cout << "Enter your PIN : " << endl;
-    cin >> enteredPin;
-
-    if (enteredPin != accounts[index].pin)
-    {
-        cout << "Incorrect PIN!" << endl;
+    if (!verifyPin(index))
         return;
-    }
-
 
     cout << "Account Holder: " << accounts[index].name << endl;
     cout << "Account Number: " << accounts[index].accountNumber << endl;
@@ -225,15 +251,8 @@ void viewTransactionHistory() {
         return;
     }
 
-    string enteredPin;
-    cout << "Enter your PIN : " << endl;
-    cin >> enteredPin;
-
-    if (enteredPin != accounts[index].pin)
-    {
-        cout << "Incorrect PIN!" << endl;
+    if (!verifyPin(index))
         return;
-    }
 
     if (accounts[index].transactions.empty())
     {
@@ -270,15 +289,8 @@ void fundTransfer() {
         return;
     }
 
-    string enteredPin;
-    cout << "Enter your PIN : " << endl;
-    cin >> enteredPin;
-
-    if (enteredPin != accounts[index].pin)
-    {
-        cout << "Incorrect PIN!" << endl;
+    if (!verifyPin(index))
         return;
-    }
 
     int receiverNumber;
     cout << "Enter receiver's account number: " << endl;
@@ -338,6 +350,8 @@ void saveAccounts()
         file << accounts[i].contact << "\n";
         file << accounts[i].pin << "\n";
         file << accounts[i].balance << "\n";
+        file << accounts[i].failedAttempts << "\n";
+        file << accounts[i].lockoutTime << "\n";
     }
     file.close();
 }
@@ -356,6 +370,8 @@ void loadAccounts()
         getline(file, acc.contact);
         getline(file, acc.pin);
         file >> acc.balance;
+        file >> acc.failedAttempts;
+        file >> acc.lockoutTime;
         file.ignore();
         accounts.push_back(acc);
         if (acc.accountNumber >= nextAccountNumber)
