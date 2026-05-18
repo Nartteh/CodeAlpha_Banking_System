@@ -3,14 +3,22 @@
 #include <vector>
 using namespace std;
 
+struct Transaction
+{
+    string type;
+    double amount;
+    double balance;
+};
+
 struct Account {
     int accountNumber;
     string name;
     string contact;
     string pin;
     double balance;
-
+    vector<Transaction> transactions;
 };
+
 
 vector<Account> accounts;
 int nextAccountNumber = 1001;
@@ -96,6 +104,11 @@ cout << "Incorrect PIN!" << endl;
     accounts[index].balance += amount;
     cout << "Deposit successful! New balance : GHS " << accounts[index].balance << endl;
 
+    Transaction t;
+    t.type = "Deposit";
+    t.amount = amount;
+    t.balance = accounts[index].balance;
+    accounts[index].transactions.push_back(t);
 }
 
 void withdrawMoney(){
@@ -142,6 +155,12 @@ void withdrawMoney(){
 
     accounts[index].balance -= amount;
     cout << "Withdrawal successful! New balance : GHS " << accounts[index].balance << endl;
+
+    Transaction t;
+    t.type = "Withdrawal";
+    t.amount = amount;
+    t.balance = accounts[index].balance;
+    accounts[index].transactions.push_back(t);
 }
 
 void checkBalance() {
@@ -183,6 +202,51 @@ void checkBalance() {
 
 }
 
+void viewTransactionHistory() {
+    int accNumber;
+
+    cout << "Enter your Account Number :" << endl;
+    cin >> accNumber;
+
+    int index = -1;
+    for (int i = 0; i < accounts.size(); i++)
+    {
+        if (accounts[i].accountNumber == accNumber)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1)
+    {
+        cout << "Account not found!" << endl;
+        return;
+    }
+
+    string enteredPin;
+    cout << "Enter your PIN : " << endl;
+    cin >> enteredPin;
+
+    if (enteredPin != accounts[index].pin)
+    {
+        cout << "Incorrect PIN!" << endl;
+        return;
+    }
+
+    if (accounts[index].transactions.empty())
+    {
+        cout << "No transaction history found." << endl;
+        return;
+    }
+
+    cout << "Transaction History for Account Number: " << accounts[index].accountNumber << endl;
+    for (const Transaction& t : accounts[index].transactions)
+    {
+        cout << t.type << ": GHS " << t.amount << " | Balance after transaction: GHS " << t.balance << endl;
+    }
+}
+
 int main(){
     int menu;
 
@@ -221,7 +285,7 @@ int main(){
             checkBalance();
             break;
         case 5:
-            cout << "Feature coming soon!" << endl;
+            viewTransactionHistory();
             break;
         case 6:
             cout << "Feature coming soon!" << endl;
